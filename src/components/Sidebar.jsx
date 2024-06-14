@@ -13,7 +13,7 @@ const Sidebar = () => {
   return (
     <div className="bg-gray-800 text-white min-h-screen w-64 flex flex-col">
       <div className="p-4">
-        <h1 className="text-2xl font-bold">Sidebar</h1>
+        <h1 className="text-2xl font-bold">Web Article</h1>
       </div>
       <nav className="mt-6 flex-grow">
         <ul className="space-y-2">

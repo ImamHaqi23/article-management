@@ -1,8 +1,6 @@
-/* eslint-disable react/prop-types */
-import { useEffect, useState, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 import Cookies from 'js-cookie';
-import { useTable } from 'react-table';
 
 const Users = () => {
   const [users, setUsers] = useState([]);
@@ -36,11 +34,14 @@ const Users = () => {
 
   const handleDeleteUser = async (id) => {
     try {
-      await axios.delete(`http://103.164.54.252:8000/api/users/${id}`);
+      await axios.delete(`http://103.164.54.252:8000/api/users/${id}`, {
+        headers: {
+          Authorization: `Bearer ${Cookies.get('accessToken')}`,
+        },
+      });
       setUsers((prevUsers) => prevUsers.filter((user) => user.id !== id));
     } catch (error) {
       console.error('Failed to delete user:', error);
-      // Handle error or display error message
     }
   };
 
@@ -54,11 +55,22 @@ const Users = () => {
     });
   };
 
-  const handleFormChange = (e) => {
+  const handleCancelEdit = () => {
+    setEditUser(null);
     setEditFormData({
-      ...editFormData,
-      [e.target.name]: e.target.value,
+      first_name: '',
+      last_name: '',
+      username: '',
+      email: '',
     });
+  };
+
+  const handleFormChange = (e) => {
+    const { name, value } = e.target;
+    setEditFormData((prevFormData) => ({
+      ...prevFormData,
+      [name]: value,
+    }));
   };
 
   const handleUpdateUser = async (id) => {
@@ -83,116 +95,125 @@ const Users = () => {
     }
   };
 
-  const columns = useMemo(
-    () => [
-      {
-        Header: 'ID',
-        accessor: 'id',
-      },
-      {
-        Header: 'First Name',
-        accessor: 'first_name',
-      },
-      {
-        Header: 'Last Name',
-        accessor: 'last_name',
-      },
-      {
-        Header: 'Username',
-        accessor: 'username',
-      },
-      {
-        Header: 'Email',
-        accessor: 'email',
-      },
-      {
-        Header: 'Actions',
-        Cell: ({ row }) => (
-          <div>
-            {editUser === row.original.id ? (
-              <button
-                className="text-green-600 hover:text-green-900 mr-4"
-                onClick={() => handleUpdateUser(row.original.id)}
-              >
-                Save
-              </button>
-            ) : (
-              <button
-                className="text-indigo-600 hover:text-indigo-900 mr-4"
-                onClick={() => handleEditUser(row.original)}
-              >
-                Edit
-              </button>
-            )}
-            <button
-              className="text-red-600 hover:text-red-900"
-              onClick={() => handleDeleteUser(row.original.id)}
-            >
-              Delete
-            </button>
-          </div>
-        ),
-      },
-    ],
-    []
-  );
-
-  // Initialize react-table instance
-  const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } =
-    useTable({ columns, data: users });
-
   return (
     <div>
       <h2 className="text-2xl font-bold mb-4">Users</h2>
-      <table
-        className="min-w-full divide-y divide-gray-200"
-        {...getTableProps()}
-      >
+      <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
-          {headerGroups.map((headerGroup) => (
-            <tr {...headerGroup.getHeaderGroupProps()} key={headerGroup.id}>
-              {headerGroup.headers.map((column) => (
-                <th
-                  {...column.getHeaderProps()}
-                  key={column.id}
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  {column.render('Header')}
-                </th>
-              ))}
+          <tr>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              ID
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              First Name
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Last Name
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Username
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Email
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Actions
+            </th>
+          </tr>
+        </thead>
+        <tbody className="bg-white divide-y divide-gray-200">
+          {users.map((user) => (
+            <tr key={user.id}>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                {user.id}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                {editUser === user.id ? (
+                  <input
+                    type="text"
+                    name="first_name"
+                    value={editFormData.first_name}
+                    onChange={handleFormChange}
+                    className="border border-gray-300 rounded px-2 py-1"
+                  />
+                ) : (
+                  user.first_name
+                )}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                {editUser === user.id ? (
+                  <input
+                    type="text"
+                    name="last_name"
+                    value={editFormData.last_name}
+                    onChange={handleFormChange}
+                    className="border border-gray-300 rounded px-2 py-1"
+                  />
+                ) : (
+                  user.last_name
+                )}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                {editUser === user.id ? (
+                  <input
+                    type="text"
+                    name="username"
+                    value={editFormData.username}
+                    onChange={handleFormChange}
+                    className="border border-gray-300 rounded px-2 py-1"
+                  />
+                ) : (
+                  user.username
+                )}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                {editUser === user.id ? (
+                  <input
+                    type="text"
+                    name="email"
+                    value={editFormData.email}
+                    onChange={handleFormChange}
+                    className="border border-gray-300 rounded px-2 py-1"
+                  />
+                ) : (
+                  user.email
+                )}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                {editUser === user.id ? (
+                  <>
+                    <button
+                      className="text-green-600 hover:text-green-900 mr-4"
+                      onClick={() => handleUpdateUser(user.id)}
+                    >
+                      Save
+                    </button>
+                    <button
+                      className="text-gray-600 hover:text-gray-900"
+                      onClick={handleCancelEdit}
+                    >
+                      Cancel
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      className="text-indigo-600 hover:text-indigo-900 mr-4"
+                      onClick={() => handleEditUser(user)}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      className="text-red-600 hover:text-red-900"
+                      onClick={() => handleDeleteUser(user.id)}
+                    >
+                      Delete
+                    </button>
+                  </>
+                )}
+              </td>
             </tr>
           ))}
-        </thead>
-        <tbody
-          {...getTableBodyProps()}
-          className="bg-white divide-y divide-gray-200"
-        >
-          {rows.map((row) => {
-            prepareRow(row);
-            return (
-              <tr {...row.getRowProps()} key={row.id}>
-                {row.cells.map((cell) => (
-                  <td
-                    {...cell.getCellProps()}
-                    key={cell.column.id}
-                    className="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
-                  >
-                    {editUser === row.original.id ? (
-                      <input
-                        type="text"
-                        name={cell.column.id}
-                        value={editFormData[cell.column.id]}
-                        onChange={handleFormChange}
-                        className="border border-gray-300 rounded px-2 py-1"
-                      />
-                    ) : (
-                      cell.render('Cell')
-                    )}
-                  </td>
-                ))}
-              </tr>
-            );
-          })}
         </tbody>
       </table>
     </div>

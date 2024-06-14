@@ -3,7 +3,7 @@ import axios from 'axios';
 import Cookies from 'js-cookie';
 
 const UserProfile = () => {
-  const [userProfile, setUserProfile] = useState(null);
+  const [userProfile, setUserProfile] = useState([]);
 
   useEffect(() => {
     const fetchUserProfile = async () => {

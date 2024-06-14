@@ -36,7 +36,6 @@ const ArticlesAdmin = () => {
             },
           }
         );
-        // Adding 'index' property to each article for the custom 'ID' column
         const articlesWithIndex = response.data.data.map((article, index) => ({
           ...article,
           index,
